@@ -1,0 +1,43 @@
+# kubernetes-manifests/client-mobile-sim.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-mobile-sim-service
+  labels:
+    app: client-mobile-sim
+spec:
+  selector:
+    app: client-mobile-sim
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-mobile-sim-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client-mobile-sim
+  template:
+    metadata:
+      labels:
+        app: client-mobile-sim
+    spec:
+      containers:
+        - name: client-mobile-sim
+          image: sebsgo/client-sim:1.0 
+          ports:
+            - containerPort: 8080
+          env:
+          # --- Conexión al API Gateway (Kong) ---
+          # La API Base apunta a la URL externa expuesta por Kong/Minikube.
+          # Para simplificar, asumimos que usa la ruta que expone Kong.
+            - name: API_BASE_URL
+              value: "http://kong-kong-proxy:80" # URL interna del Kong Proxy
+            - name: AUTH_SERVICE_URL
+              value: "http://kong-kong-proxy:80/auth" # Apunta a Kong para autenticación

@@ -1,0 +1,69 @@
+# kubernetes-manifests/ms-usuarios.yaml
+
+# 1. Service (ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-usuarios-service
+  labels:
+    app: ms-usuarios
+spec:
+  selector:
+    app: ms-usuarios
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+  type: ClusterIP 
+---
+
+# 2. Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-usuarios-deployment
+spec:
+  replicas: 1 # <-- Replicas 
+  selector:
+    matchLabels:
+      app: ms-usuarios
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: ms-usuarios 
+    spec:
+      containers:
+        - name: ms-usuarios
+          image: sebsgo/ms-usuarios:1.1 
+          imagePullPolicy: IfNotPresent
+          resources: # <-- OPTIMIZACIÓN DE RECURSOS (RETO 01)
+            requests:
+              cpu: "250m"  # 0.25 vCPU
+              memory: "128Mi"
+            limits:
+              cpu: "500m"  # Máximo 0.5 vCPU
+              memory: "256Mi"
+          ports:
+            - containerPort: 3001
+          env:
+            # --- Variables de la Aplicación y Seguridad ---
+            - name: PORT
+              value: "3001"
+            - name: JWT_SECRET
+              value: "ESTE_ES_UN_SECRETO_PARA_DESARROLLO_NO_USAR_EN_PROD"
+            - name: JWT_EXPIRES_IN
+              value: "1h"
+              
+            # --- Variables de Conexión a la Base de Datos (PostgreSQL) ---
+            - name: DB_HOST
+              value: db-usuarios 
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: user_usuarios
+            - name: DB_PASSWORD
+              value: password_usuarios 
+            - name: DB_NAME
+              value: db_usuarios

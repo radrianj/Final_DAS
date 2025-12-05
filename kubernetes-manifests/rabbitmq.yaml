@@ -1,0 +1,86 @@
+# 1. Persistent Volume Claim (PVC) - RabbitMQ
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-pv-claim
+  labels:
+    app: rabbitmq
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+
+# 2. Deployment - RabbitMQ
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-deployment
+  labels:
+    app: rabbitmq
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3-management-alpine
+          ports:
+            - name: amqp
+              containerPort: 5672
+            - name: management
+              containerPort: 15672
+            - name: metrics         # <--- NUEVO: Puerto para Prometheus
+              containerPort: 15692
+          volumeMounts:
+            - name: rabbitmq-storage
+              mountPath: /var/lib/rabbitmq
+            - name: rabbitmq-config # <--- NUEVO: Montamos la config de plugins
+              mountPath: /etc/rabbitmq/enabled_plugins
+              subPath: enabled_plugins
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: user
+            - name: RABBITMQ_DEFAULT_PASS
+              value: password
+      volumes:
+        - name: rabbitmq-storage
+          persistentVolumeClaim:
+            claimName: rabbitmq-pv-claim
+        - name: rabbitmq-config     # <--- NUEVO: Definición del volumen config
+          configMap:
+            name: rabbitmq-config
+---
+
+# 3. Service - RabbitMQ
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  labels:
+    app: rabbitmq
+spec:
+  ports:
+    - name: amqp-port
+      port: 5672
+      targetPort: 5672
+      protocol: TCP
+    - name: management-port
+      port: 15672
+      targetPort: 15672
+      protocol: TCP
+    - name: metrics-port      # <--- NUEVO: Exponemos el puerto al servicio
+      port: 15692
+      targetPort: 15692
+      protocol: TCP
+  selector:
+    app: rabbitmq
+  type: ClusterIP

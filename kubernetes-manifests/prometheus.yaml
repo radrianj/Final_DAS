@@ -1,0 +1,87 @@
+# kubernetes-manifests/prometheus.yaml
+
+# 1. ConfigMap: Configuración de scraping (qué monitorear)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+spec:
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+
+    scrape_configs:
+      # --- Monitoreo de Microservicios ---
+      # Usamos los nombres de los Services definidos en los archivos previos
+      
+      - job_name: 'ms-auth'
+        static_configs:
+          - targets: ['ms-auth-service:4000']
+      
+      - job_name: 'ms-usuarios'
+        static_configs:
+          - targets: ['ms-usuarios-service:3001']
+      
+      - job_name: 'ms-agenda'
+        static_configs:
+          - targets: ['ms-agenda-service:3002']
+      
+      - job_name: 'ms-tutorias'
+        static_configs:
+          - targets: ['ms-tutorias-service:3000']
+      
+      - job_name: 'ms-notificaciones'
+        static_configs:
+          - targets: ['ms-notificaciones-service:3003']
+      
+      # --- Monitoreo de Infraestructura ---
+      - job_name: 'rabbitmq'
+        static_configs:
+          - targets: ['rabbitmq:15692'] # Puerto de métricas Prometheus de RabbitMQ
+
+---
+# 2. Deployment: El servidor de Prometheus
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:latest
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/prometheus
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config
+
+---
+# 3. Service: Para acceder a Prometheus
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+  type: NodePort # Permite acceso externo vía Minikube IP

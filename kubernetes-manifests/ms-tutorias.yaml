@@ -1,0 +1,79 @@
+# kubernetes-manifests/ms-tutorias.yaml
+
+# 1. Service (ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-tutorias-service 
+  labels:
+    app: ms-tutorias
+spec:
+  selector:
+    app: ms-tutorias
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+
+# 2. Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-tutorias-deployment
+spec:
+  replicas: 1 # 
+  selector:
+    matchLabels:
+      app: ms-tutorias
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled 
+      labels:
+        app: ms-tutorias
+    spec:
+      containers: 
+        - name: ms-tutorias
+          image: sebsgo/ms-tutorias:1.2
+          imagePullPolicy: IfNotPresent
+          resources: # <-- OPTIMIZACIÓN DE RECURSOS (RETO 01)
+            requests:
+              cpu: "250m"  # 0.25 vCPU (25% de un núcleo)
+              memory: "128Mi"
+            limits:
+              cpu: "500m"  # Máximo 0.5 vCPU
+              memory: "256Mi"
+          ports:
+            - containerPort: 3000
+          env:
+            # --- Variables de la Aplicación y Seguridad ---
+            - name: PORT
+              value: "3000"
+            - name: JWT_SECRET
+              value: "ESTE_ES_UN_SECRETO_PARA_DESARROLLO_NO_USAR_EN_PROD"
+
+            # --- Conexiones a Microservicios ---
+            - name: MS_USUARIOS_URL
+              value: "http://ms-usuarios-service:3001/usuarios" 
+            - name: MS_AGENDA_URL
+              value: "http://ms-agenda-service:3002/agenda" 
+            - name: MS_NOTIFICACIONES_URL
+              value: "http://ms-notificaciones-service:3003/notificaciones" 
+
+            # --- Conexión a la Base de Datos (PostgreSQL) ---
+            - name: DB_HOST
+              value: db-tutorias
+            - name: DB_PORT
+              value: "5432" 
+            - name: DB_USER
+              value: user_tutorias
+            - name: DB_PASSWORD
+              value: password_tutorias 
+            - name: DB_NAME
+              value: db_tutorias
+
+            # --- Conexión a RabbitMQ ---
+            - name: RABBITMQ_URL
+              value: amqp://user:password@rabbitmq:5672

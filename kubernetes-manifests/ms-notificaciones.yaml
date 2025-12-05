@@ -1,0 +1,55 @@
+# kubernetes-manifests/ms-notificaciones.yaml
+
+# 1. Service (ClusterIP)
+# Define el nombre del servicio interno para otros microservicios (o para health checks).
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-notificaciones-service # Nombre de DNS interno
+  labels:
+    app: ms-notificaciones
+spec:
+  selector:
+    app: ms-notificaciones
+  ports:
+    - protocol: TCP
+      port: 3003 # Puerto del Service
+      targetPort: 3003 # Puerto en el contenedor
+  type: ClusterIP
+---
+
+# 2. Deployment
+# Define la configuración de la réplica para el worker de notificaciones.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-notificaciones-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-notificaciones
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: ms-notificaciones 
+    spec:
+      # --- CORRECCIÓN CLAVE: containers está anidado correctamente bajo spec ---
+      containers:
+        - name: ms-notificaciones
+          image: sebsgo/ms-notificaciones:1.0 
+          imagePullPolicy: IfNotPresent # Añadido para usar la imagen local de minikube/Docker.
+          ports:
+            - containerPort: 3003
+          env:
+            # Variables de la Aplicación 
+            - name: PORT
+              value: "3003"
+            
+            # Variables de Conexión a RabbitMQ 
+            - name: RABBITMQ_URL
+              value: amqp://user:password@rabbitmq:5672

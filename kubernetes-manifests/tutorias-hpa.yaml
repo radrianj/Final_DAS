@@ -1,0 +1,19 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ms-tutorias-deployment-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ms-tutorias-deployment
+  minReplicas: 1 # <-- Mínimo requerido
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      # Escala si el uso promedio de CPU supera el 50% del valor de 'requests' (250m)
+      target:
+        type: Utilization
+        averageUtilization: 50
