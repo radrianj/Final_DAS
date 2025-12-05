@@ -1,0 +1,79 @@
+# Configuración para kube-prometheus-stack (Prometheus + Grafana + Alertmanager)
+# RETO 03: Observabilidad
+
+# Prometheus: Recolector de métricas
+prometheus:
+  prometheusSpec:
+    # Scrape automático de servicios con anotaciones
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    retention: 7d                     # Guardar métricas por 7 días
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+    # Scrape tus microservicios (express-prom-bundle)
+    additionalScrapeConfigs:
+      - job_name: 'tutorias-microservices'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+
+# Grafana: Visualización
+grafana:
+  enabled: true
+  adminPassword: "admin123"           # Password para acceder a Grafana
+  service:
+    type: NodePort                    # Exponer fuera del clúster
+    nodePort: 32000                   # Puerto para acceder desde navegador
+  persistence:
+    enabled: true                     # Guardar dashboards
+    size: 2Gi
+  # Dashboards pre-instalados
+  defaultDashboardsEnabled: true      # Dashboards de K8s por defecto
+  additionalDataSources:
+    - name: Prometheus
+      type: prometheus
+      url: http://kube-prometheus-prometheus:9090
+      access: proxy
+      isDefault: true
+
+# Alertmanager: Gestor de alertas
+alertmanager:
+  enabled: true
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname', 'job']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 12h
+      receiver: 'default'
+    receivers:
+      - name: 'default'
+        # AQUI configurarás Slack/Discord para RETO 03
+        webhook_configs: []
+
+# Node Exporter: Métricas del nodo (CPU, RAM del servidor)
+nodeExporter:
+  enabled: true
+
+# Kube State Metrics: Métricas de objetos K8s (pods, deployments, etc.)
+kubeStateMetrics:
+  enabled: true

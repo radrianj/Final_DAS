@@ -1,0 +1,28 @@
+# Configuración para PostgreSQL (vía Bitnami Helm Chart)
+# Esto reemplaza databases.yaml del repo
+
+auth:
+  # Usuario y contraseña de la base de datos
+  postgresPassword: "admin123"        # Password del usuario postgres
+  database: "tutorias"                # Nombre de la base de datos
+  username: "tutorias_user"           # Usuario adicional
+  password: "tutorias_pass"           # Password del usuario adicional
+
+primary:
+  # Configuración del pod principal de PostgreSQL
+  persistence:
+    enabled: true                     # Habilitar persistencia (datos no se pierden)
+    size: 5Gi                         # Tamaño del disco
+  resources:
+    requests:
+      memory: "256Mi"                 # Memoria mínima
+      cpu: "250m"                     # CPU mínima
+    limits:
+      memory: "512Mi"                 # Memoria máxima
+      cpu: "500m"                     # CPU máxima
+
+# Exponer métricas para Prometheus
+metrics:
+  enabled: true                       # Habilitar exportador de métricas
+  serviceMonitor:
+    enabled: true                     # Crear ServiceMonitor para Prometheus

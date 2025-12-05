@@ -1,0 +1,39 @@
+# Configuración para RabbitMQ (vía Bitnami Helm Chart)
+# Para RETO 06, este archivo se actualiza con HA
+
+auth:
+  # Credenciales de RabbitMQ
+  username: "admin"
+  password: "admin123"
+  erlangCookie: "secretcookie123"     # Cookie para clustering
+
+# Configuración básica (REQUISITO BASE)
+replicaCount: 1                       # 1 réplica (cambiar a 3 para RETO 06)
+
+persistence:
+  enabled: true                       # Habilitar persistencia
+  size: 5Gi                           # Tamaño del disco
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Exponer el Management UI (interfaz web de RabbitMQ)
+service:
+  type: ClusterIP                     # Servicio interno
+  ports:
+    amqp: 5672                        # Puerto AMQP (protocolo de mensajería)
+    management: 15672                 # Puerto de Management UI
+
+# Métricas para Prometheus
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+# Plugins de RabbitMQ
+extraPlugins: "rabbitmq_prometheus"   # Plugin para exportar métricas
