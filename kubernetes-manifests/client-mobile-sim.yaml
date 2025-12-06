@@ -30,7 +30,8 @@ spec:
     spec:
       containers:
         - name: client-mobile-sim
-          image: sebsgo/client-sim:1.0 
+          image: client-mobile-sim:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8080
           env:

@@ -46,12 +46,7 @@ grafana:
     size: 2Gi
   # Dashboards pre-instalados
   defaultDashboardsEnabled: true      # Dashboards de K8s por defecto
-  additionalDataSources:
-    - name: Prometheus
-      type: prometheus
-      url: http://kube-prometheus-prometheus:9090
-      access: proxy
-      isDefault: true
+  # NO AGREGAR additionalDataSources aquí - el chart ya crea Prometheus por defecto
 
 # Alertmanager: Gestor de alertas
 alertmanager:

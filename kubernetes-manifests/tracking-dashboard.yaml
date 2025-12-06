@@ -30,7 +30,8 @@ spec:
     spec:
       containers:
         - name: tracking-dashboard
-          image: sebsgo/tracking-dashboard:1.0 # Imagen que construiste localmente
+          image: tracking-dashboard:latest # Imagen que construiste localmente
+          imagePullPolicy: Never
           ports:
             - containerPort: 9000
           env:

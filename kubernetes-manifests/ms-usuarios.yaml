@@ -36,8 +36,8 @@ spec:
     spec:
       containers:
         - name: ms-usuarios
-          image: sebsgo/ms-usuarios:1.1 
-          imagePullPolicy: IfNotPresent
+          image: ms-usuarios:latest 
+          imagePullPolicy: Never
           resources: # <-- OPTIMIZACIÓN DE RECURSOS (RETO 01)
             requests:
               cpu: "250m"  # 0.25 vCPU

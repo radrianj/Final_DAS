@@ -40,8 +40,8 @@ spec:
       # --- CORRECCIÓN CLAVE: containers está anidado correctamente bajo spec ---
       containers:
         - name: ms-auth
-          image: sebsgo/ms-auth:1.2 # Asegúrate que esta imagen exista y sea accesible.
-          imagePullPolicy: IfNotPresent # Añadido para evitar ErrImagePull si la imagen ya está en minikube/Docker.
+          image: ms-auth:latest  # Asegúrate que esta imagen exista y sea accesible.
+          imagePullPolicy: Never # Añadido para evitar ErrImagePull si la imagen ya está en minikube/Docker.
           ports:
             - containerPort: 4000
           env:

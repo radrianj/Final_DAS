@@ -36,8 +36,8 @@ spec:
     spec:
       containers: 
         - name: ms-tutorias
-          image: sebsgo/ms-tutorias:1.2
-          imagePullPolicy: IfNotPresent
+          image: ms-tutorias:latest 
+          imagePullPolicy: Never
           resources: # <-- OPTIMIZACIÓN DE RECURSOS (RETO 01)
             requests:
               cpu: "250m"  # 0.25 vCPU (25% de un núcleo)

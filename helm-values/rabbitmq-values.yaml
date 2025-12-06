@@ -1,3 +1,13 @@
+# NOTA: Este archivo YA NO SE USA en la instalación actual
+# Se reemplazó por: k8s/rabbitmq-deployment.yaml (RabbitMQ oficial)
+# Motivo: La imagen bitnami/rabbitmq:4.1.3-debian-12-r1 no existe en Docker Hub
+# Mantener para referencia futura o RETO 06 (HA con 3 réplicas)
+
+# Configuración para RabbitMQ (vía Bitnami Helm Chart)
+# Para RETO 06, este archivo se actualiza con HA
+...
+
+
 # Configuración para RabbitMQ (vía Bitnami Helm Chart)
 # Para RETO 06, este archivo se actualiza con HA
 

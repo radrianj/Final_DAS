@@ -41,8 +41,8 @@ spec:
       # --- CORRECCIÓN CLAVE: containers está anidado correctamente bajo spec ---
       containers:
         - name: ms-agenda
-          image: sebsgo/ms-agenda:1.0 # La imagen que publicaste
-          imagePullPolicy: IfNotPresent # Añadido para evitar ErrImagePull si la imagen ya está en minikube/Docker.
+          image: ms-agenda:latest # La imagen que publicaste
+          imagePullPolicy: Never # Añadido para evitar ErrImagePull si la imagen ya está en minikube/Docker.
           ports:
             - containerPort: 3002
           env:

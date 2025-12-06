@@ -41,8 +41,8 @@ spec:
       # --- CORRECCIÓN CLAVE: containers está anidado correctamente bajo spec ---
       containers:
         - name: ms-notificaciones
-          image: sebsgo/ms-notificaciones:1.0 
-          imagePullPolicy: IfNotPresent # Añadido para usar la imagen local de minikube/Docker.
+          image: ms-notificaciones:latest
+          imagePullPolicy: Never # Añadido para usar la imagen local de minikube/Docker.
           ports:
             - containerPort: 3003
           env:
