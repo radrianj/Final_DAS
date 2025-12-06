@@ -1,4 +1,12 @@
 # k8s/rabbitmq-deployment.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-config
+  namespace: default
+data:
+  enabled_plugins: |
+    [rabbitmq_management,rabbitmq_prometheus].
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -7,7 +15,6 @@ metadata:
   namespace: default
   labels:
     app: rabbitmq
-    app.kubernetes.io/name: rabbitmq
 spec:
   replicas: 1
   selector:
@@ -17,11 +24,6 @@ spec:
     metadata:
       labels:
         app: rabbitmq
-        app.kubernetes.io/name: rabbitmq
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "15692"
-        prometheus.io/path: "/metrics"
     spec:
       containers:
       - name: rabbitmq
@@ -29,13 +31,10 @@ spec:
         ports:
         - containerPort: 5672
           name: amqp
-          protocol: TCP
         - containerPort: 15672
           name: management
-          protocol: TCP
         - containerPort: 15692
           name: prometheus
-          protocol: TCP
         env:
         - name: RABBITMQ_DEFAULT_USER
           value: "admin"
@@ -43,32 +42,21 @@ spec:
           value: "admin123"
         - name: RABBITMQ_ERLANG_COOKIE
           value: "secretcookie123"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/rabbitmq/enabled_plugins
+          subPath: enabled_plugins
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
             memory: "512Mi"
             cpu: "500m"
-        livenessProbe:
-          exec:
-            command:
-            - rabbitmq-diagnostics
-            - -q
-            - ping
-          initialDelaySeconds: 60
-          periodSeconds: 30
-          timeoutSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - rabbitmq-diagnostics
-            - -q
-            - check_running
-          initialDelaySeconds: 20
-          periodSeconds: 10
-          timeoutSeconds: 10
-
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: config
+        configMap:
+          name: rabbitmq-config
 ---
 apiVersion: v1
 kind: Service
@@ -84,17 +72,13 @@ spec:
   - port: 5672
     targetPort: 5672
     name: amqp
-    protocol: TCP
   - port: 15672
     targetPort: 15672
     name: management
-    protocol: TCP
   - port: 15692
     targetPort: 15692
     name: prometheus
-    protocol: TCP
   type: ClusterIP
-
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

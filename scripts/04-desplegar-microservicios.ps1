@@ -15,22 +15,15 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Aplicando manifiestos de Kubernetes..." -ForegroundColor Yellow
 Write-Host ""
 
-# Desplegar microservicios
+# Desplegar microservicios (solo archivos principales)
 $manifests = @(
     "ms-auth.yaml",
-    "ms-auth-service.yaml",
     "ms-usuarios.yaml",
-    "ms-usuarios-service.yaml",
     "ms-agenda.yaml",
-    "ms-agenda-service.yaml",
     "ms-tutorias.yaml",
-    "ms-tutorias-service.yaml",
     "ms-notificaciones.yaml",
-    "ms-notificaciones-service.yaml",
     "client-mobile-sim.yaml",
-    "client-sim-service.yaml",
-    "tracking-dashboard.yaml",
-    "dashboard-service.yaml"
+    "tracking-dashboard.yaml"
 )
 
 foreach ($manifest in $manifests) {
@@ -66,6 +59,8 @@ foreach ($ingress in $ingressFiles) {
     if (Test-Path $ingress) {
         Write-Host "  - Aplicando $ingress..." -ForegroundColor Cyan
         kubectl apply -f $ingress
+    } else {
+        Write-Host "[WARN] No se encontro $ingress" -ForegroundColor Yellow
     }
 }
 
