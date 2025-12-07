@@ -36,7 +36,7 @@ spec:
     spec:
       containers: 
         - name: ms-tutorias
-          image: ms-tutorias:latest 
+          image: ms-tutorias:metrics 
           imagePullPolicy: Never
           resources: # <-- OPTIMIZACIÓN DE RECURSOS (RETO 01)
             requests:
@@ -64,15 +64,15 @@ spec:
 
             # --- Conexión a la Base de Datos (PostgreSQL) ---
             - name: DB_HOST
-              value: db-tutorias
+              value: postgresql
             - name: DB_PORT
               value: "5432" 
             - name: DB_USER
-              value: user_tutorias
+              value: tutorias_user
             - name: DB_PASSWORD
-              value: password_tutorias 
+              value: tutorias_pass 
             - name: DB_NAME
-              value: db_tutorias
+              value: tutorias
 
             # --- Conexión a RabbitMQ ---
             - name: RABBITMQ_URL

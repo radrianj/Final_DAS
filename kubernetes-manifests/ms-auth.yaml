@@ -40,7 +40,7 @@ spec:
       # --- CORRECCIÓN CLAVE: containers está anidado correctamente bajo spec ---
       containers:
         - name: ms-auth
-          image: ms-auth:latest  # Asegúrate que esta imagen exista y sea accesible.
+          image: ms-auth:metrics  # Asegúrate que esta imagen exista y sea accesible.
           imagePullPolicy: Never # Añadido para evitar ErrImagePull si la imagen ya está en minikube/Docker.
           ports:
             - containerPort: 4000

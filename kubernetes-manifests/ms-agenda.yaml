@@ -41,7 +41,7 @@ spec:
       # --- CORRECCIÓN CLAVE: containers está anidado correctamente bajo spec ---
       containers:
         - name: ms-agenda
-          image: ms-agenda:latest # La imagen que publicaste
+          image: ms-agenda:metrics # La imagen que publicaste
           imagePullPolicy: Never # Añadido para evitar ErrImagePull si la imagen ya está en minikube/Docker.
           ports:
             - containerPort: 3002
@@ -58,15 +58,15 @@ spec:
               
             # --- Variables de Conexión a la Base de Datos (PostgreSQL) ---
             - name: DB_HOST
-              value: db-agenda # Nombre del Service de la BD
+              value: postgresql # Nombre del Service de la BD
             - name: DB_PORT
               value: "5432" # Puerto estándar de Postgres
             - name: DB_USER
-              value: user_agenda
+              value: tutorias_user
             - name: DB_PASSWORD
-              value: password_agenda
+              value: tutorias_pass
             - name: DB_NAME
-              value: db_agenda
+              value: tutorias
 
             # --- Variables de Conexión a RabbitMQ ---
             - name: RABBITMQ_URL
